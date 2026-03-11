@@ -1,4 +1,3 @@
-import { stat } from 'node:fs/promises';
 import { argv, stdin, stdout } from 'node:process';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -6,34 +5,23 @@ import { pipeline } from 'node:stream/promises';
 const ARG_PREFIX = '--';
 const ARG_PREFIX_REPLACEMENT = '';
 
-const utils = {
-	checkIsFolderExists: async (path) => {
-		try {
-			const stats = await stat(path);
-			return stats.isDirectory();
-		} catch {
-			return false;
+function parseArgs() {
+	let filteredArgs = {};
+
+	for (let i = 0; i < argv.length; i++) {
+		const argKey = argv[i];
+		if (argKey.startsWith(ARG_PREFIX)) {
+			const preparedArgKey = argKey.replace(ARG_PREFIX, ARG_PREFIX_REPLACEMENT);
+			const argValue = argv[i + 1];
+			filteredArgs[preparedArgKey] = argValue;
+			i++;
 		}
-	},
+	}
 
-	parseArgs: () => {
-		let filteredArgs = {};
+	return filteredArgs;
+}
 
-		for (let i = 0; i < argv.length; i++) {
-			const argKey = argv[i];
-			if (argKey.startsWith(ARG_PREFIX)) {
-				const preparedArgKey = argKey.replace(ARG_PREFIX, ARG_PREFIX_REPLACEMENT);
-				const argValue = argv[i + 1];
-				filteredArgs[preparedArgKey] = argValue;
-				i++;
-			}
-		}
-
-		return filteredArgs;
-	},
-};
-
-const args = utils.parseArgs();
+const args = parseArgs();
 const pattern = args.pattern || '';
 
 const transformStream = new Transform({
