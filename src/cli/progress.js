@@ -72,14 +72,16 @@ const progress = () => {
 		prevUpdateTime = uptimeInMs;
 
 		const filledLength = Math.round((progressLength / END_PROGRESS) * progress);
-		const filledProgressLine = new Array(filledLength).fill(PROGRESS_FILLED_INDICATOR).join('');
+		const filledLengthSafe = filledLength >= END_PROGRESS ? END_PROGRESS : filledLength;
+		const filledProgressLine = new Array(filledLengthSafe)
+			.fill(PROGRESS_FILLED_INDICATOR)
+			.join('');
 
-		const emptyProgressLineLength =
-			progressLength - filledLength < START_PROGRESS
-				? START_PROGRESS
-				: progressLength - filledLength;
+		const emptyProgressLineLength = progressLength - filledLengthSafe;
+		const emptyProgressLineLengthSafe =
+			emptyProgressLineLength <= START_PROGRESS ? START_PROGRESS : emptyProgressLineLength;
 
-		const emptyProgressLine = new Array(emptyProgressLineLength)
+		const emptyProgressLine = new Array(emptyProgressLineLengthSafe)
 			.fill(PROGRESS_EMPTY_INDICATOR)
 			.join('');
 
