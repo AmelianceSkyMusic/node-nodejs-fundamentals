@@ -1,6 +1,8 @@
 import { createReadStream, createWriteStream } from 'node:fs';
-import { mkdir, readdir, readFile, stat } from 'node:fs/promises';
+import { mkdir, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import { createBrotliCompress } from 'node:zlib';
 
 const rootPath = process.cwd();
@@ -48,20 +50,13 @@ const compressDir = async () => {
 	const files = await getPathFilesSnapshot(TO_COMPRESS_PATH);
 
 	for (const file of files) {
-		const filePath = path.join(TO_COMPRESS_PATH, file);
+		const pathToFile = path.join(TO_COMPRESS_PATH, file);
 
-		await new Promise((resolve, reject) => {
-			brotliCompressStream.write(`::meta::${file}::\n`, (err) =>
-				err ? reject(err) : resolve(),
-			);
-		});
+		const metaStream = Readable.from([`::meta::${file}::\n`]);
 
-		await new Promise((resolve, reject) => {
-			const input = createReadStream(filePath);
-			input.on('data', (chunk) => brotliCompressStream.write(chunk));
-			input.on('end', resolve);
-			input.on('error', reject);
-		});
+		await pipeline(metaStream, brotliCompressStream, { end: false });
+
+		await pipeline(createReadStream(pathToFile), brotliCompressStream, { end: false });
 	}
 
 	brotliCompressStream.end();
