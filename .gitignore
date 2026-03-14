@@ -10,3 +10,23 @@ data.json
 checksums.json
 source.txt
 chunk_*.txt
+
+# vscode settings
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# temp folders / files
+*._backup*
+*._legacy*
+*._temp*
+*._labs*
+*._dev*
+.file-status/
+.eslintcache
+
+#history
+.history/
+.lh/
+
+.ameliance*.sh
